@@ -23,15 +23,25 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // Endpoint for user registration.
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody @Valid UserDto userDto){
+
+        // We create a new user entity based on our DTO.
         User registeredUser = userService.registerUser(userDto);
+
+        // We save the user entity to our repository. (All the validation has been done in the DTO file).
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully. UserID: "+ registeredUser.getId());
     }
 
+    // Endpoint to login the user.
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody @Valid LoginDto loginDto, HttpSession session){
+
+        // Create a new user entity.
         User loggedInUser = userService.loginUser(loginDto);
+
+        // If there is a user to be logged in, we give him a session.
         if(loggedInUser != null){
             session.setAttribute("user", loggedInUser);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Logged in.");
@@ -41,16 +51,22 @@ public class UserController {
         }
     }
 
+    // Log Out endpoint for the user.
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(HttpSession session){
+        // We invalidate the session.
         session.invalidate();
         return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully.");
     }
 
+    // Endpoit for the user's profile.
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(HttpSession session){
+
+        // We get the user based on the session.
         User loggedInUser = userService.getLoggedInUser(session);
 
+        // If the user is logged in, we display his information.
         if (loggedInUser != null){
             return ResponseEntity.ok(loggedInUser);
         } else {

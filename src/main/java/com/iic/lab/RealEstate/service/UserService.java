@@ -20,14 +20,26 @@ public class UserService {
     @Resource
     private PasswordEncoder passwordEncoder;
 
+
+    // Register a user to our API.
     public User registerUser(UserDto userDto){
+
+        // Encoding the user's password.
+
         String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+
+        // Receiving the user's information and saving it in the repository.
         User user = new User(userDto.getFirstName(), userDto.getLastName(), userDto.getEmail(), userDto.getDateOfBirth(), encodedPassword);
         return userRepository.save(user);
     }
 
+    // Login the user to the API.
     public User loginUser(LoginDto loginDto){
+
+        // Searching the user in our DataBase via his email.
         User user = userRepository.findByEmail(loginDto.getEmail());
+
+        // If the user exists in the DataBase and has entered the correct password, we log the user in.
         if(user != null && passwordEncoder.matches(loginDto.getPassword(), user.getPassword())){
             return user;
         }

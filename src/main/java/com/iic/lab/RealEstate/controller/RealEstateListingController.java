@@ -32,21 +32,17 @@ public class RealEstateListingController {
     public ResponseEntity<?> createRealEstateListing(@RequestBody @Valid RealEstateListingDto realEstateListingDto, HttpSession session){
 
         // Get the User information based on the current session.
-
         User authenticatedUser = (User) session.getAttribute("user");
 
         // Checking if the user is logged in.
-
         if(authenticatedUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
         }
 
         // Create the Real Estate Listing with the DTO and the AuthenticatedUser.
-
         RealEstateListing createdListing = realEstateListingService.createRealEstateListing(realEstateListingDto, authenticatedUser);
 
         // Returning a message based on the value of createdListing.
-
         if(createdListing != null){
             return ResponseEntity.status(HttpStatus.CREATED).body("Real estate listing created.");
         } else{
@@ -59,17 +55,14 @@ public class RealEstateListingController {
     public ResponseEntity<?> updateRealEstateListing(@PathVariable Long realEstateListingId, @RequestBody @Valid RealEstateListingDto updatedRealEstateListingDto, HttpSession session){
 
         // Get the User details based on the session.
-
         User authenticatedUser = (User) session.getAttribute("user");
 
         // Checking if the user is logged in.
-
         if(authenticatedUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
         }
 
         // Updating the Real Estate Listing
-
         try {
             // Checking if the user who tries to modify the Real Estate Listing is the one who created it.
             if(!realEstateListingService.isUserOwnerOfRealEstateListinig(realEstateListingId, authenticatedUser.getId())){
@@ -89,17 +82,14 @@ public class RealEstateListingController {
     public ResponseEntity<?> deleteRealEstateListing(@PathVariable Long realEstateListingId, HttpSession session){
 
         // Get the user details based on the session.
-
         User authenticatedUser = (User) session.getAttribute("user");
 
         // Check if the user is logged in.
-
         if(authenticatedUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
         }
 
         // Delete the Real Estate Listing.
-
         try {
             // Checking if the user who tries to delete the Real Estate Listing is the one who created it.
             if(!realEstateListingService.isUserOwnerOfRealEstateListinig(realEstateListingId, authenticatedUser.getId())){

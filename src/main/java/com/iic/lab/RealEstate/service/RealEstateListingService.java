@@ -48,12 +48,10 @@ public class RealEstateListingService {
     public RealEstateListing updateRealEstateListing(Long realEstateListingId, RealEstateListingDto updatedRealEstateListingDto, User authenticatedUser){
 
         // Check if the Real Estate Listing exists in the database.
-
         RealEstateListing existingRealEstateListing = realEstateListingRepository.findById(realEstateListingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Real estate listing not found."));
 
         // Update the Real Estate Listing
-
         existingRealEstateListing.setName(updatedRealEstateListingDto.getName());
         existingRealEstateListing.setDescription(updatedRealEstateListingDto.getDescription());
         existingRealEstateListing.setAddress(updatedRealEstateListingDto.getAddress());
@@ -66,7 +64,6 @@ public class RealEstateListingService {
         existingRealEstateListing.setConstructionYear(updatedRealEstateListingDto.getConstructionYear());
 
         // Save the update in the RealEStateRepository
-
         return realEstateListingRepository.save(existingRealEstateListing);
 
     }
@@ -85,12 +82,10 @@ public class RealEstateListingService {
     public void deleteRealEstateListing(Long realEstateListingId, User authenticatedUser){
 
         // Checking if the Real Estate Listing exists.
-
         RealEstateListing existingRealEstateListing = realEstateListingRepository.findById(realEstateListingId)
                 .orElseThrow(() -> new ResourceNotFoundException("The real estate listing not found."));
 
         // Deleting the Real Estate Listing
-
         realEstateListingRepository.delete(existingRealEstateListing);
 
     }
