@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -172,6 +173,53 @@ public class RealEstateListingController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Real Estate Listing already added to favourites.");
         }
     }
+
+    // Sorting all the Real Estate Listings by price (asc = ascending, desc = descending)
+    @GetMapping("/order-by-price") // (/order-by-price?order=asc/desc, default = ascending)
+    public ResponseEntity<?> getAllRealEstateListingsOrderedByPrice(@RequestParam(defaultValue = "asc") String order){
+
+        // Getting all the Real Estate Listings from the repository.
+        List<RealEstateListing> allRealEstateListings = realEstateListingService.getAllRealEstateListings();
+
+        // Sorting the list, asc - ascending, desc - descending based on the order parameter.
+        if("asc".equalsIgnoreCase(order)){
+            allRealEstateListings.sort(Comparator.comparing(RealEstateListing::getPrice));
+        } else if("desc".equalsIgnoreCase(order)){
+            allRealEstateListings.sort(Comparator.comparing(RealEstateListing::getPrice).reversed());
+        } else {
+            // In case of invalid order parameter.
+            return ResponseEntity.badRequest().body("Invalid sort oder parameter");
+        }
+
+        // Returning the Real Estate Listing.
+        return ResponseEntity.ok(allRealEstateListings);
+    }
+
+    // Sorting by Utility Size
+    @GetMapping("/order-by-utility-size")
+    public ResponseEntity<?> getAllRealEstateListingsOrderedByUtilitySize(@RequestParam(defaultValue = "asc") String order){
+
+        // Getting all the Real Estate Listings from the repository.
+        List<RealEstateListing> allRealEstateListings = realEstateListingService.getAllRealEstateListings();
+
+        // Sorting the Real Estate via Utility Size, default = asc.
+        if("asc".equalsIgnoreCase(order)){
+            allRealEstateListings.sort(Comparator.comparing(RealEstateListing::getUtilitySize));
+        } else if ("desc".equalsIgnoreCase(order)){
+            allRealEstateListings.sort(Comparator.comparing(RealEstateListing::getUtilitySize).reversed());
+        } else {
+            // In case of invalid order parameter.
+            return ResponseEntity.badRequest().body("Invalid sort oder parameter.");
+        }
+
+        // Returning the sorted list based on the order parameter.
+        return ResponseEntity.ok(allRealEstateListings);
+    }
+
+
+
+
+
 
 
 

@@ -106,20 +106,4 @@ public class RealEstateListingService {
     public RealEstateListing getRealEstateListingById(Long realEstateListingId){
         return realEstateListingRepository.findById(realEstateListingId).orElse(null);
     }
-
-    /*public void removeRealEstateListingFromUserFavourites(User user, RealEstateListing realEstateListing){
-
-        // Checking if the Real Estate Listing exists in the user's favourites.
-        boolean isRealEstateListingInFavourites = userFavouriteRealEstateListingRepository.existsByUserAndRealEstateListing(user, realEstateListing);
-
-        if(isRealEstateListingInFavourites){
-            userFavouriteRealEstateListingRepository.deleteByUserAndRealEstateListing(user, realEstateListing);
-        }
-        else {
-            throw new RealEstateListingNotInFavouritesException("Real Estate Listing is not a favourite.");
-        }
-    }
-    */
-
-
 }
