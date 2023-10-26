@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 
 @Service
 public class RealEstateListingService {
@@ -27,8 +28,8 @@ public class RealEstateListingService {
         // We create the Real Estate Listing, without the creator.
         RealEstateListing realEstateListing = new RealEstateListing(
                 realEstateListingDto.getName(),
-                realEstateListingDto.getDescription(),
                 realEstateListingDto.getAddress(),
+                realEstateListingDto.getDescription(),
                 realEstateListingDto.getPrice(),
                 realEstateListingDto.getUtilitySize(),
                 realEstateListingDto.getTotalSize(),
@@ -69,11 +70,13 @@ public class RealEstateListingService {
     }
 
     public boolean isUserOwnerOfRealEstateListinig(Long realEstateListingId, Long userId){
+
+        // Checking if the Real Estate Listing exists.
         RealEstateListing existingRealEstateListing = realEstateListingRepository.findById(realEstateListingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Real estate listing not found."));
 
+        // Returning TRUE or FALSE if the creator ID is the same with the logged-in User id.
         return existingRealEstateListing.getCreator().getId().equals(userId);
-
     }
 
 
@@ -87,7 +90,11 @@ public class RealEstateListingService {
 
         // Deleting the Real Estate Listing
         realEstateListingRepository.delete(existingRealEstateListing);
+    }
 
+    // Returning all the Real Estate Listings, does not matter who created them.
+    public List<RealEstateListing> getAllRealEstateListings(){
+        return realEstateListingRepository.findAll();
     }
 
 

@@ -2,6 +2,8 @@ package com.iic.lab.RealEstate.controller;
 
 import com.iic.lab.RealEstate.dto.LoginDto;
 import com.iic.lab.RealEstate.dto.UserDto;
+import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
+import com.iic.lab.RealEstate.model.RealEstateListing;
 import com.iic.lab.RealEstate.model.User;
 import com.iic.lab.RealEstate.service.UserService;
 import com.sun.net.httpserver.HttpsServer;
@@ -12,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -59,7 +64,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully.");
     }
 
-    // Endpoit for the user's profile.
+    // Endpoint for the user's profile.
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(HttpSession session){
 
@@ -73,4 +78,52 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
         }
     }
+
+    @DeleteMapping("/delete-account/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId, HttpSession session){
+
+        //We get the user details.
+        User authenticatedUser = (User) session.getAttribute("user");
+
+        // We check that the user is logged in AND if the logged-in user is not trying to delete somebody else's account. (We check if the logged-in user ID is the same with the requested ID to be deleted).
+        if(authenticatedUser == null || !authenticatedUser.getId().equals(userId)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
+        }
+
+        // Accessing the service method.
+        try {
+            userService.deleteUserAndRealEstateListings(userId);
+            session.invalidate();
+            return ResponseEntity.ok("User account and their Real Estate Listings have been deleted.");
+        } catch (ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        }
+    }
+
+    // Getting all the Real Estate Listings created by user.
+    @GetMapping("/listings/{userId}")
+    public ResponseEntity<?> getUserListings(@PathVariable Long userId){
+
+        //Checking if the user exists.
+        boolean userExists = userService.doesUserExist(userId);
+
+        if(!userExists){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no user with such ID.");
+        }
+
+        // Getting all the listings.
+        List<RealEstateListing> userRealEstateListings = userService.getAllRealEstateListingByUser(userId);
+
+        // If the user exists, but there are no Real Estate Listings, display a message.
+        if(userRealEstateListings.isEmpty()){
+            return ResponseEntity.ok("User does not have any listings.");
+        }
+
+        // Returning all the Real Estate Listings.
+        return ResponseEntity.ok(userRealEstateListings);
+    }
+
+
+
+
 }

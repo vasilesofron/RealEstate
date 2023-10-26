@@ -50,7 +50,7 @@ public class User {
     @Size(max = 255, message = "Description must not exceed 255 characters.")
     private String description;
 
-    @OneToMany
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<RealEstateListing> listings = new ArrayList<>();
 

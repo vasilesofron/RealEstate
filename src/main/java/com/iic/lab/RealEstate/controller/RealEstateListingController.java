@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Validated
 @RequestMapping("/real-estate-api/real-estate-listing")
@@ -104,4 +106,22 @@ public class RealEstateListingController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to delete this listing.");
         }
     }
+
+    // Returning all the Real Estate Listings available.
+    @GetMapping("/all-real-estate-listings")
+    public ResponseEntity<?> getAllRealEstateListings(){
+
+        // Getting all the Real Estate Listings from the database.
+        List<RealEstateListing> allRealEstateListings = realEstateListingService.getAllRealEstateListings();
+
+        // If there are no Real Estate Listings, display a message.
+        if(allRealEstateListings.isEmpty()){
+            return ResponseEntity.ok("There are no Real Estate Listings at the moment.");
+        }
+
+        // Returning all the Real Estate Listings.
+        return ResponseEntity.ok(allRealEstateListings);
+    }
+
+
 }

@@ -20,6 +20,7 @@ public class RealEstateListingDto {
     private String address;
 
     @NotNull
+    @NotBlank(message = "Description should not be blank.")
     @NotEmpty
     private String description;
 
@@ -35,7 +36,7 @@ public class RealEstateListingDto {
     @NotNull
     private Integer bedroomNumber;
 
-    @NotNull(message = "Bathroom number should not be blank.")
+    @NotNull
     private Integer bathroomNumber;
 
     @NotNull
