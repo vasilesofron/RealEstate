@@ -97,5 +97,10 @@ public class RealEstateListingService {
         return realEstateListingRepository.findAll();
     }
 
+    // Getting a Real Estate Listing by the id.
+    public RealEstateListing getRealEstateListingById(Long realEstateListingId){
+        return realEstateListingRepository.findById(realEstateListingId).orElse(null);
+    }
+
 
 }

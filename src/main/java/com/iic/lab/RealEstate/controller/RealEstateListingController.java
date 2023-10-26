@@ -123,5 +123,48 @@ public class RealEstateListingController {
         return ResponseEntity.ok(allRealEstateListings);
     }
 
+    // Getting a specific Real Estate Listing.
+    @GetMapping("/{realEstateListingId}")
+    public ResponseEntity<?> getListingById(@PathVariable Long realEstateListingId){
+
+        //Getting the Real Estate Listing.
+        RealEstateListing realEstateListing = realEstateListingService.getRealEstateListingById(realEstateListingId);
+
+        // If the Real Estate Listing does not exist, return a message.
+        if(realEstateListing == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Real Estate listing does not exist.");
+        }
+
+        // Returning the Real Estate Listing.
+        return ResponseEntity.ok(realEstateListing);
+    }
+
+    // Adding a Real Estate Listing to Favourites. The user must be logged-in to add it to Favourites.
+    @PostMapping("/{realEstateListingId}/favourite")
+    public ResponseEntity<?> saveRealEstateListingToUserFavourite(@PathVariable Long realEstateListingId, HttpSession session){
+
+        // Checking if the User is logged in.
+        User authenticatedUser = (User) session.getAttribute("user");
+
+        // Displaying a message if the user is not logged-in.
+        if(authenticatedUser == null ){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in or unauthorized.");
+        }
+
+        // Getting the Real Estate Listing from the repository.
+        RealEstateListing listing = realEstateListingService.getRealEstateListingById(realEstateListingId);
+
+        // Displaying a message if the Real Estate Listing does not exist.
+        if(listing == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Real Estate Listing not found.");
+        }
+
+        // Adding the Real Estate listing to the database.
+        userService.saveRealEstateListingToUserFavourites(authenticatedUser, listing);
+
+        // Returning a message.
+        return ResponseEntity.status(HttpStatus.CREATED).body("Listing saved to favourites.");
+    }
+
 
 }

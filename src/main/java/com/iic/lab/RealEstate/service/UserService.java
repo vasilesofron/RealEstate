@@ -5,7 +5,9 @@ import com.iic.lab.RealEstate.dto.UserDto;
 import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
 import com.iic.lab.RealEstate.model.RealEstateListing;
 import com.iic.lab.RealEstate.model.User;
+import com.iic.lab.RealEstate.model.UserFavouriteRealEstateListing;
 import com.iic.lab.RealEstate.repository.RealEstateListingRepository;
+import com.iic.lab.RealEstate.repository.UserFavouriteRealEstateListingRepository;
 import com.iic.lab.RealEstate.repository.UserRepository;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
@@ -27,6 +29,9 @@ public class UserService {
 
     @Resource
     private RealEstateListingRepository realEstateListingRepository;
+
+    @Resource
+    private UserFavouriteRealEstateListingRepository userFavouriteRealEstateListingRepository;
 
 
     // Register a user to our API.
@@ -81,6 +86,26 @@ public class UserService {
     public boolean doesUserExist(Long userId){
         return userRepository.existsById(userId);
     }
+
+    public void saveRealEstateListingToUserFavourites(User user, RealEstateListing realEstateListing){
+
+        // Creating the Favourite Real Estate Listing object.
+        UserFavouriteRealEstateListing userFavouriteRealEstateListing = new UserFavouriteRealEstateListing();
+
+        // Setting the User and the Real Estate Listing.
+        userFavouriteRealEstateListing.setUser(user);
+        userFavouriteRealEstateListing.setRealEstateListing(realEstateListing);
+
+        // Saving the Real Estate Listing to favourite.
+        userFavouriteRealEstateListingRepository.save(userFavouriteRealEstateListing);
+    }
+
+    // Getting a User by the id.
+    public User getUserById(Long userId){
+        return userRepository.findById(userId).orElse(null);
+    }
+
+
 
 
 }

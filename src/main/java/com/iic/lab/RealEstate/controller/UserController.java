@@ -5,6 +5,7 @@ import com.iic.lab.RealEstate.dto.UserDto;
 import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
 import com.iic.lab.RealEstate.model.RealEstateListing;
 import com.iic.lab.RealEstate.model.User;
+import com.iic.lab.RealEstate.service.RealEstateListingService;
 import com.iic.lab.RealEstate.service.UserService;
 import com.sun.net.httpserver.HttpsServer;
 import jakarta.annotation.Resource;
@@ -27,6 +28,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RealEstateListingService realEstateListingService;
 
     // Endpoint for user registration.
     @PostMapping("/register")
@@ -122,8 +126,4 @@ public class UserController {
         // Returning all the Real Estate Listings.
         return ResponseEntity.ok(userRealEstateListings);
     }
-
-
-
-
 }
