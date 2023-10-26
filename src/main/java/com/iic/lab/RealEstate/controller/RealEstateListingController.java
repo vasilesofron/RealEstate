@@ -1,6 +1,7 @@
 package com.iic.lab.RealEstate.controller;
 
 import com.iic.lab.RealEstate.dto.RealEstateListingDto;
+import com.iic.lab.RealEstate.exception.RealEstateListingAlreadyInFavouritesException;
 import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
 import com.iic.lab.RealEstate.exception.UnauthorizedException;
 import com.iic.lab.RealEstate.model.RealEstateListing;
@@ -159,12 +160,21 @@ public class RealEstateListingController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Real Estate Listing not found.");
         }
 
-        // Adding the Real Estate listing to the database.
-        userService.saveRealEstateListingToUserFavourites(authenticatedUser, listing);
+        // TRY - CATCH
+        try {
+            // Adding the Real Estate listing to the database.
+            userService.saveRealEstateListingToUserFavourites(authenticatedUser, listing);
 
-        // Returning a message.
-        return ResponseEntity.status(HttpStatus.CREATED).body("Listing saved to favourites.");
+            // Returning a message.
+            return ResponseEntity.status(HttpStatus.CREATED).body("Listing saved to favourites.");
+
+        } catch (RealEstateListingAlreadyInFavouritesException e){ // CUSTOM ERROR
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Real Estate Listing already added to favourites.");
+        }
     }
+
+
+
 
 
 }

@@ -1,11 +1,13 @@
 package com.iic.lab.RealEstate.service;
 
 import com.iic.lab.RealEstate.dto.RealEstateListingDto;
+import com.iic.lab.RealEstate.exception.RealEstateListingNotInFavouritesException;
 import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
 import com.iic.lab.RealEstate.exception.UnauthorizedException;
 import com.iic.lab.RealEstate.model.RealEstateListing;
 import com.iic.lab.RealEstate.model.User;
 import com.iic.lab.RealEstate.repository.RealEstateListingRepository;
+import com.iic.lab.RealEstate.repository.UserFavouriteRealEstateListingRepository;
 import com.iic.lab.RealEstate.repository.UserRepository;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
@@ -22,6 +24,9 @@ public class RealEstateListingService {
 
     @Resource
     private UserRepository userRepository;
+
+    @Resource
+    private UserFavouriteRealEstateListingRepository userFavouriteRealEstateListingRepository;
 
     public RealEstateListing createRealEstateListing(RealEstateListingDto realEstateListingDto, User user){
 
@@ -101,6 +106,20 @@ public class RealEstateListingService {
     public RealEstateListing getRealEstateListingById(Long realEstateListingId){
         return realEstateListingRepository.findById(realEstateListingId).orElse(null);
     }
+
+    /*public void removeRealEstateListingFromUserFavourites(User user, RealEstateListing realEstateListing){
+
+        // Checking if the Real Estate Listing exists in the user's favourites.
+        boolean isRealEstateListingInFavourites = userFavouriteRealEstateListingRepository.existsByUserAndRealEstateListing(user, realEstateListing);
+
+        if(isRealEstateListingInFavourites){
+            userFavouriteRealEstateListingRepository.deleteByUserAndRealEstateListing(user, realEstateListing);
+        }
+        else {
+            throw new RealEstateListingNotInFavouritesException("Real Estate Listing is not a favourite.");
+        }
+    }
+    */
 
 
 }

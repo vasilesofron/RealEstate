@@ -2,6 +2,7 @@ package com.iic.lab.RealEstate.controller;
 
 import com.iic.lab.RealEstate.dto.LoginDto;
 import com.iic.lab.RealEstate.dto.UserDto;
+import com.iic.lab.RealEstate.exception.RealEstateListingNotInFavouritesException;
 import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
 import com.iic.lab.RealEstate.model.RealEstateListing;
 import com.iic.lab.RealEstate.model.User;
@@ -125,5 +126,59 @@ public class UserController {
 
         // Returning all the Real Estate Listings.
         return ResponseEntity.ok(userRealEstateListings);
+    }
+
+    @GetMapping("/{userId}/favourites")
+    public ResponseEntity<?> getUserFavouriteRealEstateListings(HttpSession session, @PathVariable Long userId){
+
+        // Checking if the user is logged-in.
+        User authenticatedUser = (User) session.getAttribute("user");
+        if(authenticatedUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
+        }
+
+        // Checking if the user tries to access his own favourites or somebody else's.
+        if(!authenticatedUser.getId().equals(userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
+        }
+
+        // Checking if the favourite Real Estate Listing is empty.
+        if(!userService.hasFavouriteRealEstateListings(authenticatedUser)){
+            return ResponseEntity.ok("There are no Real Estate Listings added to favourite.");
+        }
+
+        // Getting the list of favourite Real Estate listing.
+        List<RealEstateListing> favouriteRealEstateListings = userService.getUserFavouriteRealEstateListing(authenticatedUser);
+
+        // Returning the list.
+        return ResponseEntity.ok(favouriteRealEstateListings);
+    }
+
+    @DeleteMapping("/{userId}/favourites/remove/{favouriteRealEstateListingId}")
+    public ResponseEntity<?> removeRealEstateListingFromUserFavourite(@PathVariable Long favouriteRealEstateListingId, @PathVariable Long userId, HttpSession session){
+
+        User authenticatedUser = (User) session.getAttribute("user");
+
+        if(authenticatedUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
+        }
+
+        if(!authenticatedUser.getId().equals(userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized access.");
+        }
+
+        RealEstateListing favouriteRealEstateListing = realEstateListingService.getRealEstateListingById(favouriteRealEstateListingId);
+
+        if(favouriteRealEstateListing == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Real Estate Listing is not added to favourites.");
+        }
+
+        try{
+            userService.removeRealEstateListingFromUserFavourites(authenticatedUser, favouriteRealEstateListing);
+
+            return ResponseEntity.status(HttpStatus.OK).body("Listing removed from favourites.");
+        } catch (RealEstateListingNotInFavouritesException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Favourite listing not found.");
+        }
     }
 }

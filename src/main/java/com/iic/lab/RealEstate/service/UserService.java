@@ -2,6 +2,8 @@ package com.iic.lab.RealEstate.service;
 
 import com.iic.lab.RealEstate.dto.LoginDto;
 import com.iic.lab.RealEstate.dto.UserDto;
+import com.iic.lab.RealEstate.exception.RealEstateListingAlreadyInFavouritesException;
+import com.iic.lab.RealEstate.exception.RealEstateListingNotInFavouritesException;
 import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
 import com.iic.lab.RealEstate.model.RealEstateListing;
 import com.iic.lab.RealEstate.model.User;
@@ -11,10 +13,12 @@ import com.iic.lab.RealEstate.repository.UserFavouriteRealEstateListingRepositor
 import com.iic.lab.RealEstate.repository.UserRepository;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -89,15 +93,21 @@ public class UserService {
 
     public void saveRealEstateListingToUserFavourites(User user, RealEstateListing realEstateListing){
 
-        // Creating the Favourite Real Estate Listing object.
-        UserFavouriteRealEstateListing userFavouriteRealEstateListing = new UserFavouriteRealEstateListing();
+        boolean isRealEstateListingInFavourites = userFavouriteRealEstateListingRepository.existsByUserAndRealEstateListing(user, realEstateListing);
 
-        // Setting the User and the Real Estate Listing.
-        userFavouriteRealEstateListing.setUser(user);
-        userFavouriteRealEstateListing.setRealEstateListing(realEstateListing);
+        if(!isRealEstateListingInFavourites) {
 
-        // Saving the Real Estate Listing to favourite.
-        userFavouriteRealEstateListingRepository.save(userFavouriteRealEstateListing);
+            // Creating the Favourite Real Estate Listing object.
+            UserFavouriteRealEstateListing userFavouriteRealEstateListing = new UserFavouriteRealEstateListing();
+
+            // Setting the User and the Real Estate Listing.
+            userFavouriteRealEstateListing.setUser(user);
+            userFavouriteRealEstateListing.setRealEstateListing(realEstateListing);
+
+            // Saving the Real Estate Listing to favourite.
+            userFavouriteRealEstateListingRepository.save(userFavouriteRealEstateListing);
+        }
+        else throw new RealEstateListingAlreadyInFavouritesException("This Real Estate Listing is already added to favourites.");
     }
 
     // Getting a User by the id.
@@ -105,7 +115,42 @@ public class UserService {
         return userRepository.findById(userId).orElse(null);
     }
 
+    // Getting all the user's Real Estate Listings from favourite.
+    public List<RealEstateListing> getUserFavouriteRealEstateListing(User user){
 
+        // Finding the favourite listings based on the user.
+        List<UserFavouriteRealEstateListing> userFavouriteRealEstateListings = userFavouriteRealEstateListingRepository.findByUser(user);
+
+        // Storing the Real Estate Listings in this new ArrayList.
+        List<RealEstateListing> favouriteRealEstateListings = new ArrayList<>();
+
+        // Iterating through all the Real Estate listings and adding them to the ArrayList.
+        for(UserFavouriteRealEstateListing userFavouriteRealEstateListing : userFavouriteRealEstateListings){
+            favouriteRealEstateListings.add(userFavouriteRealEstateListing.getRealEstateListing());
+        }
+
+        // Returning the array list.
+        return favouriteRealEstateListings;
+    }
+
+    // Checking if the user has Real Estate listings added to favourite.
+    public boolean hasFavouriteRealEstateListings(User user){
+        return !userFavouriteRealEstateListingRepository.findByUser(user).isEmpty();
+    }
+
+    @Transactional
+    public void removeRealEstateListingFromUserFavourites(User user, RealEstateListing favouriteRealEstateListing){
+
+        // Checking if the Real Estate Listing exists in the user's favourites.
+        boolean isRealEstateListingInFavourites = userFavouriteRealEstateListingRepository.existsByUserAndRealEstateListing(user, favouriteRealEstateListing);
+
+        if(isRealEstateListingInFavourites){
+            userFavouriteRealEstateListingRepository.deleteByUserAndRealEstateListing(user, favouriteRealEstateListing);
+        }
+        else {
+            throw new RealEstateListingNotInFavouritesException("Real Estate Listing is not a favourite.");
+        }
+    }
 
 
 }
