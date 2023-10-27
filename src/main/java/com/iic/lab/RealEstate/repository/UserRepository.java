@@ -18,4 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.listings WHERE u.id = :userId")
     Optional<User> findByIdWithRealEstateListing(@Param("userId") Long userId);
 
+    // Custom query to check if the email exists in the database.
+    boolean existsByEmail(String email);
+
 }

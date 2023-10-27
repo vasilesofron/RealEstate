@@ -152,5 +152,12 @@ public class UserService {
         }
     }
 
+    // Checking if the user has the email in the database.
+    public boolean existsByEmail(String email){
+        return userRepository.existsByEmail(email);
+    }
+
+
+
 
 }

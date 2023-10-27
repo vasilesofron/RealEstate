@@ -37,6 +37,11 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody @Valid UserDto userDto){
 
+        // Checking if the email is already registered.
+        if(userService.existsByEmail(userDto.getEmail())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already registered.");
+        }
+
         // We create a new user entity based on our DTO.
         User registeredUser = userService.registerUser(userDto);
 
@@ -44,7 +49,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully. UserID: "+ registeredUser.getId());
     }
 
-    // Endpoint to login the user.
+    // Endpoint to log n the user.
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody @Valid LoginDto loginDto, HttpSession session){
 
@@ -181,4 +186,9 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Favourite listing not found.");
         }
     }
+
+
+
+
+
 }
