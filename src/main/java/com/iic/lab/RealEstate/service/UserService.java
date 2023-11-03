@@ -2,9 +2,8 @@ package com.iic.lab.RealEstate.service;
 
 import com.iic.lab.RealEstate.dto.LoginDto;
 import com.iic.lab.RealEstate.dto.UserDto;
-import com.iic.lab.RealEstate.exception.RealEstateListingAlreadyInFavouritesException;
-import com.iic.lab.RealEstate.exception.RealEstateListingNotInFavouritesException;
-import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
+import com.iic.lab.RealEstate.dto.UserProfileUpdateDto;
+import com.iic.lab.RealEstate.exception.*;
 import com.iic.lab.RealEstate.model.RealEstateListing;
 import com.iic.lab.RealEstate.model.User;
 import com.iic.lab.RealEstate.model.UserFavouriteRealEstateListing;
@@ -156,6 +155,41 @@ public class UserService {
     public boolean existsByEmail(String email){
         return userRepository.existsByEmail(email);
     }
+
+    public User updateUserProfile(User authenticatedUser, UserProfileUpdateDto updatedUser){
+
+        // Updating the old user with the new information.
+        if(updatedUser.getFirstName() != null)
+            authenticatedUser.setFirstName(updatedUser.getFirstName());
+        if(updatedUser.getLastName()!= null)
+            authenticatedUser.setLastName(updatedUser.getLastName());
+        if(updatedUser.getDateOfBirth() != null)
+            authenticatedUser.setDateOfBirth(updatedUser.getDateOfBirth());
+        if(updatedUser.getProfilePhotoUrl() != null)
+            authenticatedUser.setProfilePhotoUrl(updatedUser.getProfilePhotoUrl());
+        if(updatedUser.getDescription() != null)
+            authenticatedUser.setDescription(updatedUser.getDescription());
+
+        // Saving the user to repository.
+        return userRepository.save(authenticatedUser);
+    }
+
+    public User changeUserEmail(User user, String newEmail, String password){
+        if(!passwordEncoder.matches(password, user.getPassword())){
+            throw new UnauthorizedException("Incorrect password. Email change failed.");
+        }
+
+        if(user.getEmail().equalsIgnoreCase(newEmail)){
+            throw new BadRequestException("New email must be different from the old email.");
+        }
+
+        user.setEmail(newEmail);
+
+        return userRepository.save(user);
+
+    }
+
+
 
 
 

@@ -1,9 +1,13 @@
 package com.iic.lab.RealEstate.controller;
 
+import com.iic.lab.RealEstate.dto.ChangeEmailRequestDto;
 import com.iic.lab.RealEstate.dto.LoginDto;
 import com.iic.lab.RealEstate.dto.UserDto;
+import com.iic.lab.RealEstate.dto.UserProfileUpdateDto;
+import com.iic.lab.RealEstate.exception.BadRequestException;
 import com.iic.lab.RealEstate.exception.RealEstateListingNotInFavouritesException;
 import com.iic.lab.RealEstate.exception.ResourceNotFoundException;
+import com.iic.lab.RealEstate.exception.UnauthorizedException;
 import com.iic.lab.RealEstate.model.RealEstateListing;
 import com.iic.lab.RealEstate.model.User;
 import com.iic.lab.RealEstate.service.RealEstateListingService;
@@ -12,9 +16,11 @@ import com.sun.net.httpserver.HttpsServer;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.apache.tomcat.util.http.parser.HttpParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +38,9 @@ public class UserController {
 
     @Autowired
     private RealEstateListingService realEstateListingService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Endpoint for user registration.
     @PostMapping("/register")
@@ -187,7 +196,55 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/{userId}/update-profile")
+    public ResponseEntity<?> updateUserProfile(@RequestBody @Valid UserProfileUpdateDto updatedUserDto, HttpSession session, @PathVariable Long userId){
 
+        User authenticatedUser = (User) session.getAttribute("user");
+
+        if(authenticatedUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
+        }
+
+        if(!authenticatedUser.getId().equals(userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized access.");
+        }
+
+        User updatedUser = userService.updateUserProfile(authenticatedUser, updatedUserDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Profile updated!");
+    }
+
+    @PutMapping("/{userId}/change-email")
+    public ResponseEntity<?> changeUserEmail(@RequestBody @Valid ChangeEmailRequestDto changeEmailRequestDto, HttpSession session, @PathVariable Long userId){
+
+        User authenticatedUser = (User) session.getAttribute("user");
+
+        if(authenticatedUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
+        }
+
+        if(!authenticatedUser.getId().equals(userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized access.");
+        }
+
+        /*if(!authenticatedUser.getEmail().equals(changeEmailRequestDto.getCurrentEmail()) || !passwordEncoder.matches(changeEmailRequestDto.getPassword(), authenticatedUser.getPassword())){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect current email or password.");
+        }
+        */
+
+        try {
+            User updatedUser = userService.changeUserEmail(authenticatedUser, changeEmailRequestDto.getNewEmail(), changeEmailRequestDto.getPassword());
+            return ResponseEntity.status(HttpStatus.OK).body("Email changed successfully.");
+        } catch (UnauthorizedException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
+        } catch (BadRequestException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("New email must be different from old email.");
+        }
+
+
+
+
+    }
 
 
 
